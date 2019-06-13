@@ -234,7 +234,7 @@ class task_rec<task<T>>: public basic_task_rec {
 	 auto nested_result = result.get();
 	 nested_result->join();
       }
-      const T& get() const {
+      const task<T>& get() const {
 	 std::lock_guard<std::mutex> lock(mutex);
 	 return result.get();
       }
