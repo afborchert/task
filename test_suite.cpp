@@ -45,7 +45,7 @@ bool t1() {
    auto e = mt::submit(tp, {c, d}, [=]() {
       return c->get() + d->get();
    });
-   return e->get() == 42;
+   return e->get_value() == 42;
 }
 
 /* test that computes Fibonacci numbers recursively */
@@ -73,7 +73,7 @@ bool t2() {
 	 auto res = mt::submit(tpool, {}, [&tpool, n, &fibonacci]() {
 	    return fibonacci(tpool, n);
 	 });
-	 if (res->get() != results[n]) return false;
+	 if (res->get_value() != results[n]) return false;
       }
    }
    return true;

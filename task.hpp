@@ -213,6 +213,10 @@ class task_rec: public basic_task_rec {
 	 std::lock_guard<std::mutex> lock(mutex);
 	 return result.get();
       }
+      const T& get_value() const {
+	 std::lock_guard<std::mutex> lock(mutex);
+	 return result.get();
+      }
    private:
       mutable std::mutex mutex;
       std::shared_future<T> result;
@@ -232,8 +236,12 @@ class task_rec<task<T>>: public basic_task_rec {
       }
       const T& get() const {
 	 std::lock_guard<std::mutex> lock(mutex);
+	 return result.get();
+      }
+      const T& get_value() const {
+	 std::lock_guard<std::mutex> lock(mutex);
 	 auto nested_result = result.get();
-	 return nested_result->get();
+	 return nested_result->get_value();
       }
    private:
       mutable std::mutex mutex;
