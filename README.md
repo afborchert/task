@@ -27,7 +27,7 @@ but task _c_ depends on the completion of _a_ and _b_.
 
 Note that implicitly a directed anti-cyclic graph is
 created where the objects returned by this `mt::submit`
-function are edges, i.e. pointers to the internal vertices
+function are pointers to the internal vertices
 of the graph. These pointers are based on `std::shared_ptr`
 which are automatically free'd.
 
