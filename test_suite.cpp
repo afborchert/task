@@ -50,8 +50,7 @@ bool t1() {
 
 /* test that computes Fibonacci numbers recursively */
 bool t2() {
-   auto fibonacci = [](mt::thread_pool& tp, unsigned int n)
-	 -> mt::task<unsigned int> {
+   auto fibonacci = [](mt::thread_pool& tp, unsigned int n) {
       auto fib_impl = [](mt::thread_pool& tp, unsigned int n, auto& fib) {
 	 if (n <= 1) {
 	    return mt::submit(tp, {}, [n]() {
@@ -80,11 +79,9 @@ bool t2() {
 }
 
 struct statistics {
-   statistics() : passed(0), failed(0), exceptions(0) {
-   }
-   unsigned int passed;
-   unsigned int failed;
-   unsigned int exceptions;
+   unsigned int passed = 0;
+   unsigned int failed = 0;
+   unsigned int exceptions = 0;
 };
 
 template<typename F>
