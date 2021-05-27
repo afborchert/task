@@ -32,9 +32,9 @@
 #ifndef MT_TASK_HPP
 #define MT_TASK_HPP 1
 
-#if __cplusplus < 201103L
+#if __cplusplus < 201402L
 #error This file requires compiler and library support for the \
-ISO C++ 2011 standard.
+ISO C++ 2014 standard.
 #else
 
 #include <cassert>
@@ -435,5 +435,5 @@ auto submit(thread_pool& tp,
 
 } // namespace mt
 
-#endif // of #if __cplusplus < 201103L #else ...
+#endif // of #if __cplusplus < 201402L #else ...
 #endif // of #ifndef MT_TASK_HPP
