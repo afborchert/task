@@ -309,6 +309,14 @@ class task_group {
       auto submit(std::initializer_list<basic_task> dependencies,
 	    F&& task_function, Parameters&&... parameters)
 	       -> task<decltype(task_function(parameters...))> {
+	 return submit(dependencies.begin(), dependencies.end(),
+	    std::forward<F>(task_function),
+	    std::forward<Parameters>(parameters)...);
+      }
+      template<typename Iterator, typename F, typename... Parameters>
+      auto submit(Iterator begin, Iterator end,
+	    F&& task_function, Parameters&&... parameters)
+	       -> task<decltype(task_function(parameters...))> {
 	 using T = decltype(task_function(parameters...));
 	 auto f = std::make_shared<std::packaged_task<T()>>(
 	    std::bind(std::forward<F>(task_function),
@@ -316,8 +324,8 @@ class task_group {
 	 );
 	 auto th = std::make_shared<task_handle_rec>();
 	 auto t = std::make_shared<task_rec<T>>(th, f->get_future());
-	 for (auto dependency: dependencies) {
-	    th->add_dependency(dependency->get_handle());
+	 for (auto it = begin; it != end; ++it) {
+	    th->add_dependency((*it)->get_handle());
 	 }
 	 {
 	    std::lock_guard<std::mutex> lock(mutex);
