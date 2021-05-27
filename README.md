@@ -48,12 +48,9 @@ A recursive divide-and-conquer-pattern can be implemented as follows:
 	    return sum1->get_value() + sum2->get_value();
 	 });
       };
-      return fib_impl(n, fib_impl);
+      return fib_impl(n, fib_impl)->get_value();
    };
-   auto job = mt::submit(tp, {}, [&]() {
-      return fibonacci(10);
-   });
-   int result = job->get_value();
+   int result = fibonacci(10);
 ```
 
 ## License
