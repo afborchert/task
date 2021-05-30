@@ -53,6 +53,74 @@ A recursive divide-and-conquer-pattern can be implemented as follows:
    int result = fibonacci(10);
 ```
 
+Task groups allow to synchronize with the completion of an arbitrary
+number of individual tasks. This is particularly convenient for tasks
+that do not return a value. Just create a task group object of type
+`mt::task_group` which needs a reference to a thread pool and submit
+tasks to the task group. The destructor of the task group will wait
+until all tasks are finished which were submitted to the task group.
+Following example demonstrates this for a parallelized quicksort
+implementation:
+
+```C++
+#include <algorithm>
+#include <functional>
+#include <iterator>
+#include <utility>
+#include <task.hpp>
+#include <thread_pool.hpp>
+
+namespace pqsort_impl {
+   template<typename RandomIt, typename Compare>
+   auto partition(RandomIt begin, RandomIt end, Compare cmp) {
+      /* using Hoare partitioning */
+      auto len = std::distance(begin, end);
+      auto pivot = *(std::next(begin, len/2));
+      auto it1 = begin;
+      auto it2 = std::next(begin, len-1);
+      for(;;) {
+	 while (cmp(*it1, pivot)) {
+	    ++it1;
+	 }
+	 while (cmp(pivot, *it2)) {
+	    --it2;
+	 }
+	 if (it1 >= it2) {
+	    return it1;
+	 }
+	 std::iter_swap(it1, it2);
+      }
+   }
+
+   template<typename RandomIt, typename Compare>
+   void sort(mt::task_group& tg, RandomIt begin, RandomIt end, Compare cmp) {
+      if (std::distance(begin, end) > 1) {
+	 auto p = tg.submit({}, [=]() {
+	    /* avoid argument-dependent lookup of partition,
+	       otherwise we might conflict with std::partition */
+	    return ::pqsort_impl::partition(begin, end, cmp);
+	 });
+	 tg.submit({p}, [=,&tg]() {
+	    sort(tg, begin, p->get_value(), cmp);
+	 });
+	 tg.submit({p}, [=,&tg]() {
+	    sort(tg, p->get_value(), end, cmp);
+	 });
+      }
+   }
+} // namespace pqsort_impl
+
+template<typename RandomIt, typename Compare = std::less<>>
+void pqsort(mt::thread_pool& tp,
+      RandomIt begin, RandomIt end, Compare cmp = Compare{}) {
+   mt::task_group tg(tp);
+   pqsort_impl::sort(tg, begin, end, cmp);
+}
+```
+
+In this example, _pqsort_ will not return until all tasks
+submitted to _tg_ are completed.
+
 ## License
 
 This package is available under the terms of
