@@ -102,10 +102,58 @@ void t(const std::string& name, F&& f, statistics& stats) {
    std::cout << std::endl;
 }
 
+bool t3() {
+   mt::thread_pool tp(2);
+   int a_val, b_val, c_val, d_val, e_val;
+   auto a = mt::submit(tp, {}, [&]() {
+      a_val = 7;
+   });
+   auto b = mt::submit(tp, {}, [&]() {
+      b_val = 22;
+   });
+   auto c = mt::submit(tp, {a, b}, [&]() {
+      c_val = a_val + b_val;
+   });
+   auto d = mt::submit(tp, {}, [&]() {
+      d_val = 13;
+   });
+   auto e = mt::submit(tp, {c, d}, [&]() {
+      e_val = c_val + d_val;
+   });
+   e->join();
+   return e_val == 42;
+}
+
+bool t4() {
+   mt::thread_pool tp(2);
+   int a_val, b_val, c_val, d_val, e_val;
+   {
+      mt::task_group tg(tp);
+      auto a = tg.submit({}, [&]() {
+	 a_val = 7;
+      });
+      auto b = tg.submit({}, [&]() {
+	 b_val = 22;
+      });
+      auto c = tg.submit({a, b}, [&]() {
+	 c_val = a_val + b_val;
+      });
+      auto d = tg.submit({}, [&]() {
+	 d_val = 13;
+      });
+      auto e = tg.submit({c, d}, [&]() {
+	 e_val = c_val + d_val;
+      });
+   }
+   return e_val == 42;
+}
+
 int main() {
    statistics stats;
    t(" t1", t1, stats);
    t(" t2", t2, stats);
+   t(" t3", t3, stats);
+   t(" t4", t4, stats);
    unsigned int tests = stats.passed + stats.failed;
    if (tests == stats.passed) {
       std::cout << "all tests passed" << std::endl;
