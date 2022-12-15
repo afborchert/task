@@ -1,5 +1,5 @@
 /* 
-   Copyright (c) 2017, 2019, 2021 Andreas F. Borchert
+   Copyright (c) 2017, 2019, 2021, 2022 Andreas F. Borchert
    All rights reserved.
 
    Permission is hereby granted, free of charge, to any person obtaining
@@ -105,8 +105,6 @@ class task_handle_rec: public std::enable_shared_from_this<task_handle_rec> {
 	    SUBMITTED: submitted to corresponding thread pool
 	    FINISHED:  task is finished
 	 */
-      task_handle_rec() : state(PREPARING), dependencies_left(0) {
-      }
       ~task_handle_rec() {
 	 assert(state == FINISHED);
       }
@@ -202,9 +200,9 @@ class task_handle_rec: public std::enable_shared_from_this<task_handle_rec> {
 
    private:
       std::mutex mutex;
-      State state;
+      State state = PREPARING;
       std::function<void()> submit_task;
-      std::size_t dependencies_left;
+      std::size_t dependencies_left = 0;
       std::list<task_handle> dependents;
 };
 
@@ -321,7 +319,7 @@ class task_rec<task<void>>: public basic_task_rec {
    of this task group are finished */
 class task_group {
    public:
-      task_group(thread_pool& tp) : tp(tp), active(0) {
+      task_group(thread_pool& tp) : tp(tp) {
       }
       ~task_group() {
 	 join();
@@ -376,7 +374,7 @@ class task_group {
       std::mutex mutex;
       std::condition_variable cv;
       thread_pool& tp;
-      std::size_t active; /* number of still running tasks */
+      std::size_t active = 0; /* number of still running tasks */
 };
 
 /* submission front-end where the dependencies are
