@@ -186,7 +186,7 @@ int main() {
    t(" t2", t2, stats);
    t(" t3", t3, stats);
    t(" t4", t4, stats);
-   t(" t4", t5, stats);
+   t(" t5", t5, stats);
    unsigned int tests = stats.passed + stats.failed;
    if (tests == stats.passed) {
       std::cout << "all tests passed" << std::endl;
