@@ -25,6 +25,7 @@
 
 #include <functional>
 #include <iostream>
+
 #include <task.hpp>
 #include <thread_pool.hpp>
 
@@ -37,13 +38,13 @@ bool t1() {
       return 22;
    });
    auto c = mt::submit(tp, {a, b}, [=]() {
-      return a->get() + b->get();
+      return a->get_value() + b->get_value();
    });
    auto d = mt::submit(tp, {}, []() {
       return 13;
    });
    auto e = mt::submit(tp, {c, d}, [=]() {
-      return c->get() + d->get();
+      return c->get_value() + d->get_value();
    });
    return e->get_value() == 42;
 }
@@ -60,7 +61,7 @@ bool t2() {
 	 auto sum1 = fib(tp, n-1, fib);
 	 auto sum2 = fib(tp, n-2, fib);
 	 return mt::submit(tp, {sum1, sum2}, [=]() {
-	    return sum1->get() + sum2->get();
+	    return sum1->get_value() + sum2->get_value();
 	 });
       };
       return fib_impl(tp, n, fib_impl);
@@ -148,12 +149,44 @@ bool t4() {
    return e_val == 42;
 }
 
+bool t5() {
+   mt::thread_pool tp(2);
+   auto foo = [](mt::thread_pool& tp, int a, int b, auto& foo) {
+      int len = b - a;
+      if (len <= 2) {
+	 return mt::submit(tp, {}, [=]() {
+	    if (len == 1) {
+	       return a;
+	    } else if (len == 2) {
+	       return a + a + 1;
+	    } else {
+	       return 0;
+	    }
+	 });
+      } else {
+	 int mid = a + len/2;
+	 auto part1 = mt::submit(tp, {}, [=,&tp]() {
+	    return foo(tp, a, mid, foo);
+	 });
+	 auto part2 = mt::submit(tp, {}, [=,&tp]() {
+	    return foo(tp, mid, b, foo);
+	 });
+	 return mt::submit(tp, {part1, part2}, [=]() {
+	    return part1->get_value() + part2->get_value();
+	 });
+      }
+   };
+   auto result = foo(tp, 0, 100, foo);
+   return result->get_value() == 4950;
+}
+
 int main() {
    statistics stats;
    t(" t1", t1, stats);
    t(" t2", t2, stats);
    t(" t3", t3, stats);
    t(" t4", t4, stats);
+   t(" t4", t5, stats);
    unsigned int tests = stats.passed + stats.failed;
    if (tests == stats.passed) {
       std::cout << "all tests passed" << std::endl;

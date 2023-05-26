@@ -1,7 +1,7 @@
 CC := $(CXX)
 DEBUG := -g # -fprofile-arcs -ftest-coverage
 THREADS := -pthread
-CXXFLAGS := -Wfatal-errors -Wall -I. -Itpool -std=c++14 $(DEBUG) $(THREADS)
+CXXFLAGS := -Wfatal-errors -Wall -I. -Itpool -std=c++17 $(DEBUG) $(THREADS)
 LDFLAGS := $(DEBUG) $(THREADS)
 .PHONY:		all clean
 all:		test_suite

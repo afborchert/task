@@ -1,9 +1,9 @@
 # task
-Tasks with dependencies for C++14
+Tasks with dependencies for C++17
 
 ## Summary
 
-This header-only C++14 package is an extension of the thread pool
+This header-only C++17 package is an extension of the thread pool
 package that allows to create tasks with dependencies. If the number of
 dependencies is non-empty, the actual submission to the thread pool
 will be postponed until all dependencies are resolved.
@@ -146,4 +146,4 @@ If you want to clone this project, you should do this recursively:
 git clone --recursive https://github.com/afborchert/task.git
 ```
 
-You will need a compiler with support for C++14.
+You will need a compiler with support for C++17.
